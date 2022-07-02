@@ -21,7 +21,7 @@ pub fn spawn_system(mut commands: Commands) {
         .insert(Head);
 }
 
-#[allow(clippy::clippy::needless_pass_by_value)]
+#[allow(clippy::needless_pass_by_value)]
 pub fn movement_system(
     keyboard_input: Res<Input<KeyCode>>,
     mut head_positions: Query<&mut Transform, With<Head>>,
