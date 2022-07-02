@@ -2,12 +2,10 @@ use bevy::prelude::*;
 
 const SNAKE_HEAD_COLOR: Color = Color::rgb(0.7, 0.7, 0.7);
 
-#[allow(clippy::module_name_repetitions)]
 #[derive(Component)]
-pub struct SnakeHead;
+pub struct Head;
 
-#[allow(clippy::module_name_repetitions)]
-pub fn spawn_snake(mut commands: Commands) {
+pub fn spawn_system(mut commands: Commands) {
     commands
         .spawn_bundle(SpriteBundle {
             sprite: Sprite {
@@ -20,13 +18,13 @@ pub fn spawn_snake(mut commands: Commands) {
             },
             ..default()
         })
-        .insert(SnakeHead);
+        .insert(Head);
 }
 
-#[allow(clippy::module_name_repetitions)]
-pub fn snake_movement(
-    keyboard_input: &Res<Input<KeyCode>>,
-    mut head_positions: Query<&mut Transform, With<SnakeHead>>,
+#[allow(clippy::clippy::needless_pass_by_value)]
+pub fn movement_system(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut head_positions: Query<&mut Transform, With<Head>>,
 ) {
     for mut transform in head_positions.iter_mut() {
         if keyboard_input.pressed(KeyCode::D) {
@@ -54,12 +52,12 @@ mod test {
         let mut app = App::new();
 
         // Add startup system
-        app.add_startup_system(spawn_snake);
+        app.add_startup_system(spawn_system);
 
         // Run systems
         app.update();
 
-        let mut query = app.world.query_filtered::<Entity, With<SnakeHead>>();
+        let mut query = app.world.query_filtered::<Entity, With<Head>>();
         assert_eq!(query.iter(&app.world).count(), 1);
     }
 
@@ -70,8 +68,8 @@ mod test {
         let default_transform = Transform { ..default() };
 
         // Add systems
-        app.add_startup_system(spawn_snake)
-            .add_system(snake_movement);
+        app.add_startup_system(spawn_system)
+            .add_system(movement_system);
 
         // Add input resource
         let mut input = Input::<KeyCode>::default();
@@ -81,7 +79,7 @@ mod test {
         // Run systems
         app.update();
 
-        let mut query = app.world.query::<(&SnakeHead, &Transform)>();
+        let mut query = app.world.query::<(&Head, &Transform)>();
         query.iter(&app.world).for_each(|(_head, transform)| {
             assert!(default_transform.translation.y < transform.translation.y);
             assert_eq!(default_transform.translation.x, transform.translation.x);
@@ -95,8 +93,8 @@ mod test {
         let default_transform = Transform { ..default() };
 
         // Add systems
-        app.add_startup_system(spawn_snake)
-            .add_system(snake_movement);
+        app.add_startup_system(spawn_system)
+            .add_system(movement_system);
 
         // Move Up
         let mut up_transform = Transform { ..default() };
@@ -104,7 +102,7 @@ mod test {
         input.press(KeyCode::W);
         app.insert_resource(input);
         app.update();
-        let mut query = app.world.query::<(&SnakeHead, &Transform)>();
+        let mut query = app.world.query::<(&Head, &Transform)>();
         query.iter(&app.world).for_each(|(_head, transform)| {
             assert!(default_transform.translation.y < transform.translation.y);
             assert_eq!(default_transform.translation.x, transform.translation.x);
@@ -116,7 +114,7 @@ mod test {
         input.press(KeyCode::D);
         app.insert_resource(input);
         app.update();
-        let mut query = app.world.query::<(&SnakeHead, &Transform)>();
+        let mut query = app.world.query::<(&Head, &Transform)>();
         query.iter(&app.world).for_each(|(_head, transform)| {
             assert_eq!(up_transform.translation.y, transform.translation.y);
             assert!(up_transform.translation.x < transform.translation.x);
@@ -130,8 +128,8 @@ mod test {
         let default_transform = Transform { ..default() };
 
         // Add systems
-        app.add_startup_system(spawn_snake)
-            .add_system(snake_movement);
+        app.add_startup_system(spawn_system)
+            .add_system(movement_system);
 
         // Move down
         let mut input = Input::<KeyCode>::default();
@@ -146,7 +144,7 @@ mod test {
         app.update();
 
         // Assert
-        let mut query = app.world.query::<(&SnakeHead, &Transform)>();
+        let mut query = app.world.query::<(&Head, &Transform)>();
         query.iter(&app.world).for_each(|(_head, transform)| {
             assert!(default_transform.translation.y > transform.translation.y);
             assert!(default_transform.translation.x > transform.translation.x);
