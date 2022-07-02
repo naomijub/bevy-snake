@@ -2,9 +2,11 @@ use bevy::prelude::*;
 
 const SNAKE_HEAD_COLOR: Color = Color::rgb(0.7, 0.7, 0.7);
 
+#[allow(clippy::module_name_repetitions)]
 #[derive(Component)]
 pub struct SnakeHead;
 
+#[allow(clippy::module_name_repetitions)]
 pub fn spawn_snake(mut commands: Commands) {
     commands
         .spawn_bundle(SpriteBundle {
@@ -21,8 +23,9 @@ pub fn spawn_snake(mut commands: Commands) {
         .insert(SnakeHead);
 }
 
+#[allow(clippy::module_name_repetitions)]
 pub fn snake_movement(
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: &Res<Input<KeyCode>>,
     mut head_positions: Query<&mut Transform, With<SnakeHead>>,
 ) {
     for mut transform in head_positions.iter_mut() {
