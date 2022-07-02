@@ -34,6 +34,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - uses: actions/checkout@v2
     - name: FMT
       run: cargo fmt -- --check
 
@@ -41,6 +42,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - uses: actions/checkout@v2
     - name: install-clippy
       run: rustup component add clippy
     - name: clippy
