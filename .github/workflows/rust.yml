@@ -1,0 +1,45 @@
+name: Rust
+
+on:
+  push:
+    branches: [ "*" ]
+  pull_request:
+    branches: [ "*" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build
+      run: cargo build --verbose
+    - name: Run tests
+      run: cargo test --verbose
+      
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: tests
+      run: cargo test -- --nocapture
+  
+  fmt:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: FMT
+      run: cargo fmt -- --check
+
+  clippy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: install-clippy
+      run: rustup component add clippy
+    - name: clippy
+      run: cargo clippy -- -W clippy::pedantic --deny "warnings"
