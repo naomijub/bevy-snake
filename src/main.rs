@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 mod snake;
 
-use snake::{spawn_snake, snake_movement};
+use snake::{snake_movement, spawn_snake};
 
 fn main() {
     App::new()

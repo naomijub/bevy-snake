@@ -22,8 +22,8 @@ pub fn spawn_snake(mut commands: Commands) {
 }
 
 pub fn snake_movement(
-    keyboard_input: Res<Input<KeyCode>>, 
-    mut head_positions: Query<&mut Transform, With<SnakeHead>>
+    keyboard_input: Res<Input<KeyCode>>,
+    mut head_positions: Query<&mut Transform, With<SnakeHead>>,
 ) {
     for mut transform in head_positions.iter_mut() {
         if keyboard_input.pressed(KeyCode::D) {
@@ -57,18 +57,18 @@ mod test {
         app.update();
 
         let mut query = app.world.query_filtered::<Entity, With<SnakeHead>>();
-        assert_eq!( query.iter(&app.world).count(), 1);
+        assert_eq!(query.iter(&app.world).count(), 1);
     }
 
     #[test]
     fn snake_head_has_moved_up() {
         // Setup
         let mut app = App::new();
-        let default_transform = Transform {..default()};
+        let default_transform = Transform { ..default() };
 
         // Add systems
         app.add_startup_system(spawn_snake)
-        .add_system(snake_movement);
+            .add_system(snake_movement);
 
         // Add input resource
         let mut input = Input::<KeyCode>::default();
@@ -89,14 +89,14 @@ mod test {
     fn snake_head_moves_up_and_right() {
         // Setup
         let mut app = App::new();
-        let default_transform = Transform {..default()};
+        let default_transform = Transform { ..default() };
 
         // Add systems
         app.add_startup_system(spawn_snake)
-        .add_system(snake_movement);
+            .add_system(snake_movement);
 
         // Move Up
-        let mut up_transform = Transform {..default()};
+        let mut up_transform = Transform { ..default() };
         let mut input = Input::<KeyCode>::default();
         input.press(KeyCode::W);
         app.insert_resource(input);
@@ -115,7 +115,7 @@ mod test {
         app.update();
         let mut query = app.world.query::<(&SnakeHead, &Transform)>();
         query.iter(&app.world).for_each(|(_head, transform)| {
-            assert_eq!(up_transform.translation.y , transform.translation.y);
+            assert_eq!(up_transform.translation.y, transform.translation.y);
             assert!(up_transform.translation.x < transform.translation.x);
         })
     }
@@ -124,18 +124,17 @@ mod test {
     fn snake_head_moves_down_and_left() {
         // Setup
         let mut app = App::new();
-        let default_transform = Transform {..default()};
+        let default_transform = Transform { ..default() };
 
         // Add systems
         app.add_startup_system(spawn_snake)
-        .add_system(snake_movement);
+            .add_system(snake_movement);
 
         // Move down
         let mut input = Input::<KeyCode>::default();
         input.press(KeyCode::S);
         app.insert_resource(input);
         app.update();
- 
 
         // Move Left
         let mut input = Input::<KeyCode>::default();
@@ -150,5 +149,4 @@ mod test {
             assert!(default_transform.translation.x > transform.translation.x);
         })
     }
-
 }
