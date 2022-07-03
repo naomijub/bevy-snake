@@ -2,14 +2,12 @@ use bevy::prelude::*;
 
 mod snake;
 
-use snake::{spawn_snake, snake_movement};
-
 fn main() {
     App::new()
         .add_startup_system(setup_camera)
-        .add_startup_system(spawn_snake)
+        .add_startup_system(snake::spawn_system)
         .add_plugins(DefaultPlugins)
-        .add_system(snake_movement)
+        .add_system(snake::movement_system)
         .run();
 }
 
