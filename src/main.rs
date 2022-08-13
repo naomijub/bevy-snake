@@ -4,6 +4,7 @@ pub mod snake;
 pub mod components;
 pub mod grid;
 
+
 fn main() {
     App::new()
         .add_startup_system(setup_camera)
