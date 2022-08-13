@@ -22,7 +22,7 @@ pub fn spawn_system(mut commands: Commands) {
         })
         .insert(Head)
         .insert(Position { x: 3, y: 3 }) // <--
-        .insert(Size::square(0.8)); 
+        .insert(Size::square(0.8));
 }
 
 #[allow(clippy::needless_pass_by_value)]

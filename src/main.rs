@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 
-pub mod snake;
 pub mod components;
 pub mod grid;
+pub mod snake;
 
 fn main() {
     App::new()

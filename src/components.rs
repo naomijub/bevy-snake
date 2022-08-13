@@ -27,7 +27,10 @@ mod test {
 
     #[test]
     fn sized_square_is_created_calling_square_fn() {
-        let expected = Size {width: 3.14, height: 3.14};
+        let expected = Size {
+            width: 3.14,
+            height: 3.14,
+        };
         let actual = Size::square(3.14);
 
         assert_eq!(actual, expected);

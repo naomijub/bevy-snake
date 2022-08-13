@@ -1,5 +1,5 @@
+use crate::components::{Position, Size};
 use bevy::prelude::*;
-use crate::components::{Size, Position};
 
 const GRID_WIDTH: u32 = 10;
 const GRID_HEIGHT: u32 = 10;
@@ -41,16 +41,22 @@ fn translate_position(transform: &mut Transform, pos: &Position, window: &Window
 
 #[cfg(test)]
 mod test {
+    use super::*;
+    use crate::components::Size;
     use bevy::window::WindowId;
     use raw_window_handle::{RawWindowHandle, WebHandle};
-    use crate::{components::Size};
-    use super::*;
 
     #[test]
     fn transform_has_correct_scale_for_window() {
         // Setup
-        let expected_transform= Transform { scale: Vec3::new(20., 20., 1.,),..default() };
-        let mut default_transform= Transform { scale: Vec3::new(2., 3., 4.,),..default() };
+        let expected_transform = Transform {
+            scale: Vec3::new(20., 20., 1.),
+            ..default()
+        };
+        let mut default_transform = Transform {
+            scale: Vec3::new(2., 3., 4.),
+            ..default()
+        };
         let sprite_size = Size::square(1.);
 
         // Create window
@@ -58,7 +64,15 @@ mod test {
         descriptor.height = 200.;
         descriptor.width = 200.;
         let raw_window_handle = RawWindowHandle::Web(WebHandle::empty());
-        let window = Window::new(WindowId::new(), &descriptor, 200, 200, 1., None, raw_window_handle);
+        let window = Window::new(
+            WindowId::new(),
+            &descriptor,
+            200,
+            200,
+            1.,
+            None,
+            raw_window_handle,
+        );
 
         // Apply scale
         scale_sprite(&mut default_transform, &sprite_size, &window);
@@ -82,17 +96,28 @@ mod test {
 
     #[test]
     fn translate_position_to_window() {
-        let position = Position{x: 2, y: 8};
-        let mut default_transform= Transform::default();
-        let expected = Transform { translation: Vec3::new(-100., 140., 0.,),..default() };
+        let position = Position { x: 2, y: 8 };
+        let mut default_transform = Transform::default();
+        let expected = Transform {
+            translation: Vec3::new(-100., 140., 0.),
+            ..default()
+        };
 
         // Create window
         let mut descriptor = WindowDescriptor::default();
         descriptor.height = 400.;
         descriptor.width = 400.;
         let raw_window_handle = RawWindowHandle::Web(WebHandle::empty());
-        let window = Window::new(WindowId::new(), &descriptor, 400, 400, 1., None, raw_window_handle);
-        
+        let window = Window::new(
+            WindowId::new(),
+            &descriptor,
+            400,
+            400,
+            1.,
+            None,
+            raw_window_handle,
+        );
+
         // Apply translation
         translate_position(&mut default_transform, &position, &window);
 
