@@ -6,6 +6,12 @@ pub mod snake;
 
 fn main() {
     App::new()
+        .insert_resource(WindowDescriptor {
+            title: "Snake Game".to_string(),
+            width: 500.0,
+            height: 500.0,
+            ..default()
+        }) // <--
         .add_startup_system(setup_camera)
         .add_startup_system(snake::spawn_system)
         .add_plugins(DefaultPlugins)

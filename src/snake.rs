@@ -28,20 +28,20 @@ pub fn spawn_system(mut commands: Commands) {
 #[allow(clippy::needless_pass_by_value)]
 pub fn movement_system(
     keyboard_input: Res<Input<KeyCode>>,
-    mut head_positions: Query<&mut Transform, With<Head>>,
+    mut head_positions: Query<&mut Position, With<Head>>,
 ) {
-    for mut transform in head_positions.iter_mut() {
+    for mut position in head_positions.iter_mut() {
         if keyboard_input.pressed(KeyCode::D) {
-            transform.translation.x += 1.;
+            position.x += 1;
         }
         if keyboard_input.pressed(KeyCode::W) {
-            transform.translation.y += 1.;
+            position.y += 1;
         }
         if keyboard_input.pressed(KeyCode::A) {
-            transform.translation.x -= 1.;
+            position.x -= 1;
         }
         if keyboard_input.pressed(KeyCode::S) {
-            transform.translation.y -= 1.;
+            position.y -= 1;
         }
     }
 }
@@ -69,7 +69,7 @@ mod test {
     fn snake_head_has_moved_up() {
         // Setup
         let mut app = App::new();
-        let default_transform = Transform { ..default() };
+        let default_position = Position { x: 3, y: 4 };
 
         // Add systems
         app.add_startup_system(spawn_system)
@@ -83,10 +83,9 @@ mod test {
         // Run systems
         app.update();
 
-        let mut query = app.world.query::<(&Head, &Transform)>();
-        query.iter(&app.world).for_each(|(_head, transform)| {
-            assert!(default_transform.translation.y < transform.translation.y);
-            assert_eq!(default_transform.translation.x, transform.translation.x);
+        let mut query = app.world.query::<(&Head, &Position)>();
+        query.iter(&app.world).for_each(|(_head, position)| {
+            assert_eq!(&default_position, position);
         })
     }
 
@@ -94,34 +93,34 @@ mod test {
     fn snake_head_moves_up_and_right() {
         // Setup
         let mut app = App::new();
-        let default_transform = Transform { ..default() };
+        let up_position = Position { x: 3, y: 4 };
 
         // Add systems
         app.add_startup_system(spawn_system)
             .add_system(movement_system);
 
         // Move Up
-        let mut up_transform = Transform { ..default() };
         let mut input = Input::<KeyCode>::default();
         input.press(KeyCode::W);
         app.insert_resource(input);
         app.update();
-        let mut query = app.world.query::<(&Head, &Transform)>();
-        query.iter(&app.world).for_each(|(_head, transform)| {
-            assert!(default_transform.translation.y < transform.translation.y);
-            assert_eq!(default_transform.translation.x, transform.translation.x);
-            up_transform = transform.to_owned();
+
+        let mut query = app.world.query::<(&Head, &Position)>();
+        query.iter(&app.world).for_each(|(_head, position)| {
+            assert_eq!(position, &up_position);
         });
+
+        let up_right_position = Position { x: 4, y: 4 };
 
         // Move Right
         let mut input = Input::<KeyCode>::default();
         input.press(KeyCode::D);
         app.insert_resource(input);
         app.update();
-        let mut query = app.world.query::<(&Head, &Transform)>();
-        query.iter(&app.world).for_each(|(_head, transform)| {
-            assert_eq!(up_transform.translation.y, transform.translation.y);
-            assert!(up_transform.translation.x < transform.translation.x);
+
+        let mut query = app.world.query::<(&Head, &Position)>();
+        query.iter(&app.world).for_each(|(_head, position)| {
+            assert_eq!(&up_right_position, position);
         })
     }
 
@@ -129,7 +128,7 @@ mod test {
     fn snake_head_moves_down_and_left() {
         // Setup
         let mut app = App::new();
-        let default_transform = Transform { ..default() };
+        let down_left_position = Position { x: 2, y: 2 };
 
         // Add systems
         app.add_startup_system(spawn_system)
@@ -148,10 +147,9 @@ mod test {
         app.update();
 
         // Assert
-        let mut query = app.world.query::<(&Head, &Transform)>();
-        query.iter(&app.world).for_each(|(_head, transform)| {
-            assert!(default_transform.translation.y > transform.translation.y);
-            assert!(default_transform.translation.x > transform.translation.x);
+        let mut query = app.world.query::<(&Head, &Position)>();
+        query.iter(&app.world).for_each(|(_head, position)| {
+            assert_eq!(&down_left_position, position);
         })
     }
 }
