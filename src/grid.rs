@@ -22,7 +22,6 @@ pub fn position_translation(windows: Res<Windows>, mut q: Query<(&Position, &mut
     }
 }
 
-
 #[allow(clippy::cast_lossless)]
 fn scale_sprite(transform: &mut Transform, sprite_size: &Size, window: &Window) {
     transform.scale = Vec3::new(
