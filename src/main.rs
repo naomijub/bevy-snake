@@ -1,6 +1,7 @@
-use bevy::prelude::*;
+use bevy::{core::FixedTimestep, prelude::*};
 
 pub mod components;
+pub mod food;
 pub mod grid;
 pub mod snake;
 
@@ -16,6 +17,11 @@ fn main() {
         .add_startup_system(snake::spawn_system)
         .add_plugins(DefaultPlugins)
         .add_system(snake::movement_system)
+        .add_system_set(
+            SystemSet::new()
+                .with_run_criteria(FixedTimestep::step(1.0))
+                .with_system(food::spawn_system),
+        )
         .add_system_set_to_stage(
             CoreStage::PostUpdate,
             SystemSet::new()
