@@ -11,3 +11,4 @@ rand = "0.7"
 
 [dev-dependencies]
 raw-window-handle = "0.4.3"
+proptest = "1.0.0"
