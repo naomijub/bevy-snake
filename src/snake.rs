@@ -54,6 +54,7 @@ pub fn movement_system(mut heads: Query<(&mut Position, &Head)>) {
     }
 }
 
+#[allow(clippy::needless_pass_by_value)]
 pub fn movement_input_system(keyboard_input: Res<Input<KeyCode>>, mut heads: Query<&mut Head>) {
     if let Some(mut head) = heads.iter_mut().next() {
         let dir: Direction = if keyboard_input.pressed(KeyCode::A) {

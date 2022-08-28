@@ -22,7 +22,7 @@ impl Size {
     }
 }
 
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, Eq, Debug, Copy, Clone)]
 pub enum Direction {
     Left,
     Up,
@@ -31,6 +31,7 @@ pub enum Direction {
 }
 
 impl Direction {
+    #[must_use]
     pub fn opposite(self) -> Self {
         match self {
             Self::Left => Self::Right,
