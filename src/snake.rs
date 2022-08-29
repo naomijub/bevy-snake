@@ -1,11 +1,21 @@
 use bevy::prelude::*;
 
-use crate::components::{Position, Size};
+use crate::components::{Direction, Position, Size};
 
 const SNAKE_HEAD_COLOR: Color = Color::rgb(0.7, 0.7, 0.7);
 
 #[derive(Component)]
-pub struct Head;
+pub struct Head {
+    direction: Direction,
+}
+
+impl Default for Head {
+    fn default() -> Self {
+        Self {
+            direction: Direction::Up,
+        }
+    }
+}
 
 pub fn spawn_system(mut commands: Commands) {
     commands
@@ -20,28 +30,46 @@ pub fn spawn_system(mut commands: Commands) {
             },
             ..default()
         })
-        .insert(Head)
-        .insert(Position { x: 3, y: 3 }) // <--
+        .insert(Head::default())
+        .insert(Position { x: 3, y: 3 })
         .insert(Size::square(0.8));
 }
 
+pub fn movement_system(mut heads: Query<(&mut Position, &Head)>) {
+    if let Some((mut pos, head)) = heads.iter_mut().next() {
+        match &head.direction {
+            Direction::Left => {
+                pos.x -= 1;
+            }
+            Direction::Right => {
+                pos.x += 1;
+            }
+            Direction::Up => {
+                pos.y += 1;
+            }
+            Direction::Down => {
+                pos.y -= 1;
+            }
+        };
+    }
+}
+
 #[allow(clippy::needless_pass_by_value)]
-pub fn movement_system(
-    keyboard_input: Res<Input<KeyCode>>,
-    mut head_positions: Query<&mut Position, With<Head>>,
-) {
-    for mut position in head_positions.iter_mut() {
-        if keyboard_input.pressed(KeyCode::D) {
-            position.x += 1;
-        }
-        if keyboard_input.pressed(KeyCode::W) {
-            position.y += 1;
-        }
-        if keyboard_input.pressed(KeyCode::A) {
-            position.x -= 1;
-        }
-        if keyboard_input.pressed(KeyCode::S) {
-            position.y -= 1;
+pub fn movement_input_system(keyboard_input: Res<Input<KeyCode>>, mut heads: Query<&mut Head>) {
+    if let Some(mut head) = heads.iter_mut().next() {
+        let dir: Direction = if keyboard_input.pressed(KeyCode::A) {
+            Direction::Left
+        } else if keyboard_input.pressed(KeyCode::S) {
+            Direction::Down
+        } else if keyboard_input.pressed(KeyCode::W) {
+            Direction::Up
+        } else if keyboard_input.pressed(KeyCode::D) {
+            Direction::Right
+        } else {
+            head.direction
+        };
+        if dir != head.direction.opposite() {
+            head.direction = dir;
         }
     }
 }
@@ -66,6 +94,22 @@ mod test {
     }
 
     #[test]
+    fn snake_starts_moviment_up() {
+        // Setup app
+        let mut app = App::new();
+
+        // Add startup system
+        app.add_startup_system(spawn_system);
+
+        // Run systems
+        app.update();
+
+        let mut query = app.world.query::<&Head>();
+        let head = query.iter(&app.world).next().unwrap();
+        assert_eq!(head.direction, Direction::Up);
+    }
+
+    #[test]
     fn snake_head_has_moved_up() {
         // Setup
         let mut app = App::new();
@@ -73,7 +117,8 @@ mod test {
 
         // Add systems
         app.add_startup_system(spawn_system)
-            .add_system(movement_system);
+            .add_system(movement_system)
+            .add_system(movement_input_system.before(movement_system));
 
         // Add input resource
         let mut input = Input::<KeyCode>::default();
@@ -84,8 +129,9 @@ mod test {
         app.update();
 
         let mut query = app.world.query::<(&Head, &Position)>();
-        query.iter(&app.world).for_each(|(_head, position)| {
+        query.iter(&app.world).for_each(|(head, position)| {
             assert_eq!(&default_position, position);
+            assert_eq!(head.direction, Direction::Up);
         })
     }
 
@@ -97,7 +143,8 @@ mod test {
 
         // Add systems
         app.add_startup_system(spawn_system)
-            .add_system(movement_system);
+            .add_system(movement_system)
+            .add_system(movement_input_system.before(movement_system));
 
         // Move Up
         let mut input = Input::<KeyCode>::default();
@@ -119,8 +166,9 @@ mod test {
         app.update();
 
         let mut query = app.world.query::<(&Head, &Position)>();
-        query.iter(&app.world).for_each(|(_head, position)| {
+        query.iter(&app.world).for_each(|(head, position)| {
             assert_eq!(&up_right_position, position);
+            assert_eq!(head.direction, Direction::Right);
         })
     }
 
@@ -132,7 +180,14 @@ mod test {
 
         // Add systems
         app.add_startup_system(spawn_system)
-            .add_system(movement_system);
+            .add_system(movement_system)
+            .add_system(movement_input_system.before(movement_system));
+
+        // Move Left
+        let mut input = Input::<KeyCode>::default();
+        input.press(KeyCode::A);
+        app.insert_resource(input);
+        app.update();
 
         // Move down
         let mut input = Input::<KeyCode>::default();
@@ -140,9 +195,28 @@ mod test {
         app.insert_resource(input);
         app.update();
 
-        // Move Left
+        // Assert
+        let mut query = app.world.query::<(&Head, &Position)>();
+        query.iter(&app.world).for_each(|(head, position)| {
+            assert_eq!(&down_left_position, position);
+            assert_eq!(head.direction, Direction::Down);
+        })
+    }
+
+    #[test]
+    fn snake_cannot_start_moving_down() {
+        // Setup
+        let mut app = App::new();
+        let down_left_position = Position { x: 3, y: 4 };
+
+        // Add systems
+        app.add_startup_system(spawn_system)
+            .add_system(movement_system)
+            .add_system(movement_input_system.before(movement_system));
+
+        // Move down
         let mut input = Input::<KeyCode>::default();
-        input.press(KeyCode::A);
+        input.press(KeyCode::S);
         app.insert_resource(input);
         app.update();
 
