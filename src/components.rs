@@ -14,7 +14,7 @@ pub struct Size {
 
 impl Size {
     #[must_use]
-    pub fn square(x: f32) -> Self {
+    pub const fn square(x: f32) -> Self {
         Self {
             width: x,
             height: x,
@@ -32,7 +32,7 @@ pub enum Direction {
 
 impl Direction {
     #[must_use]
-    pub fn opposite(self) -> Self {
+    pub const fn opposite(self) -> Self {
         match self {
             Self::Left => Self::Right,
             Self::Right => Self::Left,
