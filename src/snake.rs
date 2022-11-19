@@ -3,11 +3,18 @@ use bevy::prelude::*;
 use crate::components::{Direction, Position, Size};
 
 const SNAKE_HEAD_COLOR: Color = Color::rgb(0.7, 0.7, 0.7);
+const SNAKE_SEGMENT_COLOR: Color = Color::rgb(0.8, 0.0, 0.8); // <--
 
 #[derive(Component)]
 pub struct Head {
     direction: Direction,
 }
+
+#[derive(Component)]
+pub struct Segment;
+
+#[derive(Default, Deref, DerefMut)]
+pub struct Segments(Vec<Entity>);
 
 impl Default for Head {
     fn default() -> Self {
@@ -17,11 +24,34 @@ impl Default for Head {
     }
 }
 
-pub fn spawn_system(mut commands: Commands) {
+pub fn spawn_system(mut commands: Commands, mut segments: ResMut<Segments>) {
+    *segments = Segments(vec![
+        commands
+            .spawn_bundle(SpriteBundle {
+                sprite: Sprite {
+                    color: SNAKE_HEAD_COLOR,
+                    ..default()
+                },
+                transform: Transform {
+                    scale: Vec3::new(10.0, 10.0, 10.0),
+                    ..default()
+                },
+                ..default()
+            })
+            .insert(Head::default())
+            .insert(Segment)
+            .insert(Position { x: 3, y: 3 })
+            .insert(Size::square(0.8))
+            .id(),
+        spawn_segment_system(commands, Position { x: 3, y: 2 }),
+    ]);
+}
+
+pub fn spawn_segment_system(mut commands: Commands, position: Position) -> Entity {
     commands
         .spawn_bundle(SpriteBundle {
             sprite: Sprite {
-                color: SNAKE_HEAD_COLOR,
+                color: SNAKE_SEGMENT_COLOR,
                 ..default()
             },
             transform: Transform {
@@ -30,9 +60,10 @@ pub fn spawn_system(mut commands: Commands) {
             },
             ..default()
         })
-        .insert(Head::default())
-        .insert(Position { x: 3, y: 3 })
-        .insert(Size::square(0.8));
+        .insert(Segment)
+        .insert(position)
+        .insert(Size::square(0.65))
+        .id()
 }
 
 pub fn movement_system(mut heads: Query<(&mut Position, &Head)>) {
@@ -84,7 +115,8 @@ mod test {
         let mut app = App::new();
 
         // Add startup system
-        app.add_startup_system(spawn_system);
+        app.insert_resource(Segments::default())
+            .add_startup_system(spawn_system);
 
         // Run systems
         app.update();
@@ -99,7 +131,8 @@ mod test {
         let mut app = App::new();
 
         // Add startup system
-        app.add_startup_system(spawn_system);
+        app.insert_resource(Segments::default())
+            .add_startup_system(spawn_system);
 
         // Run systems
         app.update();
@@ -116,7 +149,8 @@ mod test {
         let default_position = Position { x: 3, y: 4 };
 
         // Add systems
-        app.add_startup_system(spawn_system)
+        app.insert_resource(Segments::default())
+            .add_startup_system(spawn_system)
             .add_system(movement_system)
             .add_system(movement_input_system.before(movement_system));
 
@@ -142,7 +176,8 @@ mod test {
         let up_position = Position { x: 3, y: 4 };
 
         // Add systems
-        app.add_startup_system(spawn_system)
+        app.insert_resource(Segments::default())
+            .add_startup_system(spawn_system)
             .add_system(movement_system)
             .add_system(movement_input_system.before(movement_system));
 
@@ -179,7 +214,8 @@ mod test {
         let down_left_position = Position { x: 2, y: 2 };
 
         // Add systems
-        app.add_startup_system(spawn_system)
+        app.insert_resource(Segments::default())
+            .add_startup_system(spawn_system)
             .add_system(movement_system)
             .add_system(movement_input_system.before(movement_system));
 
@@ -210,7 +246,8 @@ mod test {
         let down_left_position = Position { x: 3, y: 4 };
 
         // Add systems
-        app.add_startup_system(spawn_system)
+        app.insert_resource(Segments::default())
+            .add_startup_system(spawn_system)
             .add_system(movement_system)
             .add_system(movement_input_system.before(movement_system));
 
@@ -225,5 +262,21 @@ mod test {
         query.iter(&app.world).for_each(|(_head, position)| {
             assert_eq!(&down_left_position, position);
         })
+    }
+
+    #[test]
+    fn entity_snake_has_two_segments() {
+        // Setup app
+        let mut app = App::new();
+
+        // Add startup system
+        app.insert_resource(Segments::default())
+            .add_startup_system(spawn_system);
+
+        // Run systems
+        app.update();
+
+        let mut query = app.world.query_filtered::<Entity, With<Segment>>();
+        assert_eq!(query.iter(&app.world).count(), 2);
     }
 }

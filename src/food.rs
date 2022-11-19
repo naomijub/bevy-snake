@@ -25,7 +25,7 @@ pub fn spawn_system(mut commands: Commands) {
             x: (random::<u16>() % GRID_WIDTH) as i16,
             y: (random::<u16>() % GRID_HEIGHT) as i16,
         })
-        .insert(Size::square(0.8));
+        .insert(Size::square(0.65));
 }
 
 #[cfg(test)]
