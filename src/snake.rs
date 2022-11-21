@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use bevy::prelude::*;
 
 use crate::components::{Direction, Position, Size};
@@ -66,22 +68,39 @@ pub fn spawn_segment_system(mut commands: Commands, position: Position) -> Entit
         .id()
 }
 
-pub fn movement_system(mut heads: Query<(&mut Position, &Head)>) {
-    if let Some((mut pos, head)) = heads.iter_mut().next() {
-        match &head.direction {
-            Direction::Left => {
-                pos.x -= 1;
-            }
-            Direction::Right => {
-                pos.x += 1;
-            }
-            Direction::Up => {
-                pos.y += 1;
-            }
-            Direction::Down => {
-                pos.y -= 1;
-            }
-        };
+pub fn movement_system(
+    segments: ResMut<Segments>,
+    mut heads: Query<(Entity, &Head)>,
+    mut positions: Query<(Entity, &Segment, &mut Position)>,
+) {
+    let positions_clone: HashMap<Entity, Position> = positions
+        .iter()
+        .map(|(entity, _segment, position)| (entity, position.clone()))
+        .collect();
+    if let Some((id, head)) = heads.iter_mut().next() {
+        (*segments).windows(2).for_each(|entity| {
+            if let Ok((_, _segment, mut position)) = positions.get_mut(entity[1]) {
+                if let Some(new_position) = positions_clone.get(&entity[0]) {
+                    *position = new_position.clone();
+                }
+            };
+        });
+        let _ = positions.get_mut(id).map(|(_, _segment, mut pos)| {
+            match &head.direction {
+                Direction::Left => {
+                    pos.x -= 1;
+                }
+                Direction::Right => {
+                    pos.x += 1;
+                }
+                Direction::Up => {
+                    pos.y += 1;
+                }
+                Direction::Down => {
+                    pos.y -= 1;
+                }
+            };
+        });
     }
 }
 
@@ -278,5 +297,61 @@ mod test {
 
         let mut query = app.world.query_filtered::<Entity, With<Segment>>();
         assert_eq!(query.iter(&app.world).count(), 2);
+    }
+
+    #[test]
+    fn snake_segment_has_followed_head() {
+        // Setup
+        let mut app = App::new();
+        let new_position_head_right = Position { x: 4, y: 3 };
+        let new_position_segment_right = Position { x: 3, y: 3 };
+
+        // Add systems
+        app.insert_resource(Segments::default())
+            .add_startup_system(spawn_system)
+            .add_system(movement_system)
+            .add_system(movement_input_system.before(movement_system));
+
+        // Add input resource
+        let mut input = Input::<KeyCode>::default();
+        input.press(KeyCode::D);
+        app.insert_resource(input);
+
+        // Run systems
+        app.update();
+
+        let mut query = app.world.query::<(&Head, &Position)>();
+        query.iter(&app.world).for_each(|(head, position)| {
+            assert_eq!(&new_position_head_right, position);
+            assert_eq!(head.direction, Direction::Right);
+        });
+
+        let mut query = app.world.query::<(&Segment, &Position, Without<Head>)>();
+        query.iter(&app.world).for_each(|(_segment, position, _)| {
+            assert_eq!(&new_position_segment_right, position);
+        });
+
+        // New expected positions:
+        let new_position_head_up = Position { x: 4, y: 4 };
+        let new_position_segment_up = Position { x: 4, y: 3 };
+
+        // Add new input resource
+        let mut input = Input::<KeyCode>::default();
+        input.press(KeyCode::W);
+        app.insert_resource(input);
+
+        // Run systems again
+        app.update();
+
+        let mut query = app.world.query::<(&Head, &Position)>();
+        query.iter(&app.world).for_each(|(head, position)| {
+            assert_eq!(&new_position_head_up, position);
+            assert_eq!(head.direction, Direction::Up);
+        });
+
+        let mut query = app.world.query::<(&Segment, &Position, Without<Head>)>();
+        query.iter(&app.world).for_each(|(_segment, position, _)| {
+            assert_eq!(&new_position_segment_up, position);
+        })
     }
 }
