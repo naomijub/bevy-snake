@@ -1,4 +1,5 @@
 use bevy::{core::FixedTimestep, prelude::*};
+use snake::GrowthEvent;
 
 pub mod components;
 pub mod food;
@@ -14,6 +15,8 @@ fn main() {
             ..default()
         })
         .insert_resource(snake::Segments::default())
+        .insert_resource(snake::LastTailPosition::default())
+        .add_event::<GrowthEvent>()
         .add_startup_system(setup_camera)
         .add_startup_system(snake::spawn_system)
         .add_plugins(DefaultPlugins)
@@ -25,7 +28,9 @@ fn main() {
         .add_system_set(
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(0.150))
-                .with_system(snake::movement_system),
+                .with_system(snake::movement_system)
+                .with_system(snake::eating_system.after(snake::movement_system))
+                .with_system(snake::growth_system.after(snake::eating_system)),
         )
         .add_system(snake::movement_input_system.before(snake::movement_system))
         .add_system_set_to_stage(
