@@ -2,7 +2,10 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 
-use crate::components::{Direction, Position, Size};
+use crate::{
+    components::{Direction, Position, Size},
+    food::Food,
+};
 
 const SNAKE_HEAD_COLOR: Color = Color::rgb(0.7, 0.7, 0.7);
 const SNAKE_SEGMENT_COLOR: Color = Color::rgb(0.8, 0.0, 0.8); // <--
@@ -17,6 +20,11 @@ pub struct Segment;
 
 #[derive(Default, Deref, DerefMut)]
 pub struct Segments(Vec<Entity>);
+
+pub struct GrowthEvent;
+
+#[derive(Default)]
+pub struct LastTailPosition(Option<Position>);
 
 impl Default for Head {
     fn default() -> Self {
@@ -70,6 +78,7 @@ pub fn spawn_segment_system(mut commands: Commands, position: Position) -> Entit
 
 pub fn movement_system(
     segments: ResMut<Segments>,
+    mut last_tail_position: ResMut<LastTailPosition>,
     mut heads: Query<(Entity, &Head)>,
     mut positions: Query<(Entity, &Segment, &mut Position)>,
 ) {
@@ -101,6 +110,42 @@ pub fn movement_system(
                 }
             };
         });
+        *last_tail_position = LastTailPosition(Some(
+            positions_clone
+                .get(segments.last().unwrap())
+                .unwrap()
+                .clone(),
+        ));
+    }
+}
+
+pub fn eating_system(
+    mut commands: Commands,
+    mut growth_writer: EventWriter<GrowthEvent>,
+    food_positions: Query<(Entity, &Position), With<Food>>,
+    head_positions: Query<&Position, With<Head>>,
+) {
+    for head_pos in head_positions.iter() {
+        for (ent, food_pos) in food_positions.iter() {
+            if food_pos == head_pos {
+                commands.entity(ent).despawn();
+                growth_writer.send(GrowthEvent);
+            }
+        }
+    }
+}
+
+pub fn growth_system(
+    commands: Commands,
+    last_tail_position: Res<LastTailPosition>,
+    mut segments: ResMut<Segments>,
+    mut growth_reader: EventReader<GrowthEvent>,
+) {
+    if growth_reader.iter().next().is_some() {
+        segments.push(spawn_segment_system(
+            commands,
+            last_tail_position.0.clone().unwrap(),
+        ));
     }
 }
 
@@ -169,6 +214,7 @@ mod test {
 
         // Add systems
         app.insert_resource(Segments::default())
+            .insert_resource(LastTailPosition::default())
             .add_startup_system(spawn_system)
             .add_system(movement_system)
             .add_system(movement_input_system.before(movement_system));
@@ -196,6 +242,7 @@ mod test {
 
         // Add systems
         app.insert_resource(Segments::default())
+            .insert_resource(LastTailPosition::default())
             .add_startup_system(spawn_system)
             .add_system(movement_system)
             .add_system(movement_input_system.before(movement_system));
@@ -234,6 +281,7 @@ mod test {
 
         // Add systems
         app.insert_resource(Segments::default())
+            .insert_resource(LastTailPosition::default())
             .add_startup_system(spawn_system)
             .add_system(movement_system)
             .add_system(movement_input_system.before(movement_system));
@@ -266,6 +314,7 @@ mod test {
 
         // Add systems
         app.insert_resource(Segments::default())
+            .insert_resource(LastTailPosition::default())
             .add_startup_system(spawn_system)
             .add_system(movement_system)
             .add_system(movement_input_system.before(movement_system));
@@ -308,6 +357,7 @@ mod test {
 
         // Add systems
         app.insert_resource(Segments::default())
+            .insert_resource(LastTailPosition::default())
             .add_startup_system(spawn_system)
             .add_system(movement_system)
             .add_system(movement_input_system.before(movement_system));
@@ -353,5 +403,37 @@ mod test {
         query.iter(&app.world).for_each(|(_segment, position, _)| {
             assert_eq!(&new_position_segment_up, position);
         })
+    }
+
+    #[test]
+    fn snake_grows_when_eating() {
+        // Setup
+        let mut app = App::new();
+
+        // Add systems
+        app.insert_resource(Segments::default())
+            .insert_resource(LastTailPosition::default())
+            .add_event::<GrowthEvent>()
+            .add_startup_system(spawn_system)
+            .add_system(crate::food::spawn_system)
+            .add_system_set(
+                SystemSet::new()
+                    .with_system(movement_system)
+                    .with_system(eating_system.after(movement_system))
+                    .with_system(growth_system.after(eating_system)),
+            );
+
+        // Run systems
+        app.update();
+
+        let mut query = app.world.query::<(&Segment, &Position)>();
+        assert_eq!(query.iter(&app.world).count(), 2);
+        let mut query = app.world.query::<(&Food, &Position)>();
+        assert_eq!(query.iter(&app.world).count(), 1);
+
+        app.update();
+
+        let mut query = app.world.query::<(&Segment, &Position)>();
+        assert_eq!(query.iter(&app.world).count(), 3);
     }
 }
