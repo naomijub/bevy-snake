@@ -58,7 +58,7 @@ impl Default for GameEndEvent {
 impl Display for GameEndEvent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            GameEndEvent::GameOver => write!(f, "Game Over!"),
+            Self::GameOver => write!(f, "Game Over!"),
         }
     }
 }

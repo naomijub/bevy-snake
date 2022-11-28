@@ -13,8 +13,8 @@ pub fn game_over_system(mut commands: Commands, mut reader: EventReader<GameEndE
 pub mod test {
 
     use super::*;
-    use crate::snake::{self, LastTailPosition, Segments, Head};
     use crate::components::Position;
+    use crate::snake::{self, Head, LastTailPosition, Segments};
 
     #[test]
     fn game_end_event_with_game_over() {
@@ -60,9 +60,10 @@ pub mod test {
         let mut query = app.world.query_filtered::<&Position, With<Head>>();
         let position_after_gameover = query.iter(&app.world).next().unwrap();
 
-        assert_eq!(snake_position_after_game_over, position_after_gameover.clone());
-
-
+        assert_eq!(
+            snake_position_after_game_over,
+            position_after_gameover.clone()
+        );
     }
 
     #[test]
