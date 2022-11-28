@@ -1,3 +1,5 @@
+use std::fmt::{self, Display};
+
 use bevy::prelude::Component;
 
 #[derive(Component, Clone, Debug, PartialEq, Eq)]
@@ -38,6 +40,25 @@ impl Direction {
             Self::Right => Self::Left,
             Self::Up => Self::Down,
             Self::Down => Self::Up,
+        }
+    }
+}
+
+#[derive(Component, Clone, Debug, PartialEq, Eq)]
+pub enum GameEndEvent {
+    GameOver,
+}
+
+impl Default for GameEndEvent {
+    fn default() -> Self {
+        Self::GameOver
+    }
+}
+
+impl Display for GameEndEvent {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            GameEndEvent::GameOver => write!(f, "Game Over!"),
         }
     }
 }
