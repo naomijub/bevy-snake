@@ -120,6 +120,15 @@ pub fn movement_system(
                 {
                     game_end_writer.send(GameEndEvent::GameOver);
                 }
+
+                if positions_clone
+                    .iter()
+                    .filter(|(k, _)| k != &&id)
+                    .map(|(_, v)| v)
+                    .any(|segment_position| &*pos == segment_position)
+                {
+                    game_end_writer.send(GameEndEvent::GameOver);
+                }
             });
         }
         *last_tail_position = LastTailPosition(Some(
