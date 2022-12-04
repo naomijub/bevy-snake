@@ -2,7 +2,7 @@ use std::fmt::{self, Display};
 
 use bevy::prelude::Component;
 
-#[derive(Component, Clone, Debug, PartialEq, Eq)]
+#[derive(Component, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Position {
     pub x: i16,
     pub y: i16,
