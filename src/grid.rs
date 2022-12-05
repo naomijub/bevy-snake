@@ -51,7 +51,6 @@ mod test {
     use super::*;
     use crate::components::Size;
     use bevy::window::WindowId;
-    use raw_window_handle::{RawWindowHandle, WebHandle};
 
     #[test]
     fn transform_has_correct_scale_for_window() {
@@ -70,16 +69,7 @@ mod test {
         let mut descriptor = WindowDescriptor::default();
         descriptor.height = 200.;
         descriptor.width = 200.;
-        let raw_window_handle = RawWindowHandle::Web(WebHandle::empty());
-        let window = Window::new(
-            WindowId::new(),
-            &descriptor,
-            200,
-            200,
-            1.,
-            None,
-            raw_window_handle,
-        );
+        let window = Window::new(WindowId::new(), &descriptor, 200, 200, 1., None, None);
 
         // Apply scale
         scale_sprite(&mut default_transform, &sprite_size, &window);
@@ -114,16 +104,7 @@ mod test {
         let mut descriptor = WindowDescriptor::default();
         descriptor.height = 400.;
         descriptor.width = 400.;
-        let raw_window_handle = RawWindowHandle::Web(WebHandle::empty());
-        let window = Window::new(
-            WindowId::new(),
-            &descriptor,
-            400,
-            400,
-            1.,
-            None,
-            raw_window_handle,
-        );
+        let window = Window::new(WindowId::new(), &descriptor, 400, 400, 1., None, None);
 
         // Apply translation
         translate_position(&mut default_transform, &position, &window);

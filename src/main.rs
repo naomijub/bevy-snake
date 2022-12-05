@@ -10,19 +10,21 @@ pub mod snake;
 
 fn main() {
     App::new()
-        .insert_resource(WindowDescriptor {
-            title: "Snake Game".to_string(),
-            width: 500.0,
-            height: 500.0,
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            window: WindowDescriptor {
+                title: "Snake Game".to_string(),
+                width: 500.0,
+                height: 500.0,
+                ..default()
+            },
             ..default()
-        })
+        }))
         .insert_resource(snake::Segments::default())
         .insert_resource(snake::LastTailPosition::default())
         .add_event::<GrowthEvent>()
         .add_event::<GameEndEvent>()
         .add_startup_system(setup_camera)
         .add_startup_system(snake::spawn_system)
-        .add_plugins(DefaultPlugins)
         .add_system_set(
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(1.0))
@@ -47,5 +49,5 @@ fn main() {
 }
 
 fn setup_camera(mut commands: Commands) {
-    commands.spawn_bundle(Camera2dBundle::default());
+    commands.spawn(Camera2dBundle::default());
 }

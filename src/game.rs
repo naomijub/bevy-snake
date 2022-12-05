@@ -4,7 +4,7 @@ use crate::components::GameEndEvent;
 
 pub fn game_over_system(mut commands: Commands, mut reader: EventReader<GameEndEvent>) {
     if reader.iter().next().is_some() {
-        commands.spawn().insert(GameEndEvent::GameOver);
+        commands.spawn_empty().insert(GameEndEvent::GameOver);
         println!("{}", GameEndEvent::GameOver);
     }
 }

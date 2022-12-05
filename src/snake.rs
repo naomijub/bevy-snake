@@ -19,12 +19,12 @@ pub struct Head {
 #[derive(Component)]
 pub struct Segment;
 
-#[derive(Default, Deref, DerefMut)]
+#[derive(Default, Deref, DerefMut, Resource)]
 pub struct Segments(Vec<Entity>);
 
 pub struct GrowthEvent;
 
-#[derive(Default)]
+#[derive(Default, Resource)]
 pub struct LastTailPosition(Option<Position>);
 
 impl Default for Head {
@@ -38,7 +38,7 @@ impl Default for Head {
 pub fn spawn_system(mut commands: Commands, mut segments: ResMut<Segments>) {
     *segments = Segments(vec![
         commands
-            .spawn_bundle(SpriteBundle {
+            .spawn(SpriteBundle {
                 sprite: Sprite {
                     color: SNAKE_HEAD_COLOR,
                     ..default()
@@ -60,7 +60,7 @@ pub fn spawn_system(mut commands: Commands, mut segments: ResMut<Segments>) {
 
 pub fn spawn_segment_system(mut commands: Commands, position: Position) -> Entity {
     commands
-        .spawn_bundle(SpriteBundle {
+        .spawn(SpriteBundle {
             sprite: Sprite {
                 color: SNAKE_SEGMENT_COLOR,
                 ..default()

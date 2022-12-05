@@ -32,16 +32,18 @@ pub fn spawn_system(mut commands: Commands, positions: Query<&Position>) {
         .find(|position| !positions_set.contains(position))
     {
         commands
-            .spawn_bundle(SpriteBundle {
-                sprite: Sprite {
-                    color: FOOD_COLOR,
+            .spawn((
+                SpriteBundle {
+                    sprite: Sprite {
+                        color: FOOD_COLOR,
+                        ..default()
+                    },
                     ..default()
                 },
-                ..default()
-            })
-            .insert(Food)
-            .insert(position)
-            .insert(Size::square(0.65));
+                Food,
+                Size::square(0.65),
+            ))
+            .insert(position);
     }
 }
 
