@@ -56,8 +56,8 @@ fn translate_position(transform: &mut Transform, pos: &Position, window: &Window
 mod test {
     use super::*;
     use crate::components::Size;
-    use bevy::window::WindowId;
     use approx::assert_relative_eq;
+    use bevy::window::WindowId;
 
     #[test]
     fn transform_has_correct_scale_for_window() {
