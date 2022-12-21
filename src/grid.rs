@@ -88,14 +88,14 @@ mod test {
     fn convert_position_x_for_grid_width() {
         let x = convert(4., 400., GRID_WIDTH as f32);
 
-        assert_relative_eq!(x, -20., epsilon = f32::EPSILON)
+        assert_relative_eq!(x, -20., epsilon = 0.00001)
     }
 
     #[test]
     fn convert_position_y_for_grid_height() {
         let x = convert(5., 400., GRID_HEIGHT as f32);
 
-        assert_relative_eq!(x, 20., epsilon = f32::EPSILON)
+        assert_relative_eq!(x, 20., epsilon = 0.00001)
     }
 
     #[test]
