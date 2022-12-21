@@ -3,13 +3,13 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 
 use crate::{
-    components::{Direction, GameEndEvent, Position, Size},
+    components::{self, Direction, GameEndEvent, Position, Size},
     food::Food,
     grid::{GRID_HEIGHT, GRID_WIDTH},
 };
 
 const SNAKE_HEAD_COLOR: Color = Color::rgb(0.7, 0.7, 0.7);
-const SNAKE_SEGMENT_COLOR: Color = Color::rgb(0.8, 0.0, 0.8); // <--
+const SNAKE_SEGMENT_COLOR: Color = Color::rgb(0.8, 0.0, 0.8);
 
 #[derive(Component)]
 pub struct Head {
@@ -36,7 +36,11 @@ impl Default for Head {
 }
 
 pub fn spawn_system(mut commands: Commands, mut segments: ResMut<Segments>) {
-    *segments = Segments(vec![
+    *segments = Segments(spawn_entity_with_segment(&mut commands, 0));
+}
+
+fn spawn_entity_with_segment(commands: &mut Commands, player_id: u8) -> Vec<Entity> {
+    vec![
         commands
             .spawn(SpriteBundle {
                 sprite: Sprite {
@@ -49,16 +53,17 @@ pub fn spawn_system(mut commands: Commands, mut segments: ResMut<Segments>) {
                 },
                 ..default()
             })
+            .insert(components::Player { id: player_id })
             .insert(Head::default())
             .insert(Segment)
             .insert(Position { x: 3, y: 3 })
             .insert(Size::square(0.8))
             .id(),
         spawn_segment_system(commands, Position { x: 3, y: 2 }),
-    ]);
+    ]
 }
 
-pub fn spawn_segment_system(mut commands: Commands, position: Position) -> Entity {
+pub fn spawn_segment_system(commands: &mut Commands, position: Position) -> Entity {
     commands
         .spawn(SpriteBundle {
             sprite: Sprite {
@@ -157,14 +162,14 @@ pub fn eating_system(
 }
 
 pub fn growth_system(
-    commands: Commands,
+    mut commands: Commands,
     last_tail_position: Res<LastTailPosition>,
     mut segments: ResMut<Segments>,
     mut growth_reader: EventReader<GrowthEvent>,
 ) {
     if growth_reader.iter().next().is_some() {
         segments.push(spawn_segment_system(
-            commands,
+            &mut commands,
             last_tail_position.0.clone().unwrap(),
         ));
     }

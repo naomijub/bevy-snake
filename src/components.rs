@@ -8,6 +8,11 @@ pub struct Position {
     pub y: i16,
 }
 
+#[derive(Component, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Player {
+    pub id: u8,
+}
+
 #[derive(Component, Debug, PartialEq)]
 pub struct Size {
     pub width: f32,
