@@ -57,6 +57,7 @@ mod test {
     use super::*;
     use crate::components::Size;
     use bevy::window::WindowId;
+    use approx::assert_relative_eq;
 
     #[test]
     fn transform_has_correct_scale_for_window() {
@@ -87,14 +88,14 @@ mod test {
     fn convert_position_x_for_grid_width() {
         let x = convert(4., 400., GRID_WIDTH as f32);
 
-        assert_eq!(x, -20.)
+        assert_relative_eq!(x, -20., epsilon = f32::EPSILON)
     }
 
     #[test]
     fn convert_position_y_for_grid_height() {
         let x = convert(5., 400., GRID_HEIGHT as f32);
 
-        assert_eq!(x, 20.)
+        assert_relative_eq!(x, 20., epsilon = f32::EPSILON)
     }
 
     #[test]
