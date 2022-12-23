@@ -125,7 +125,6 @@ pub mod test {
             app.update(); // 3 + _
         }
 
-        println!("{:#?}", app.world);
         let mut query = app.world.query::<&GameEndEvent>();
         assert_eq!(query.iter(&app.world).count(), 1);
     }

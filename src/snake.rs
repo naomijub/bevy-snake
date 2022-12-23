@@ -289,6 +289,9 @@ mod test {
         // Setup
         let mut app = App::new();
         let p1_default_position = Position { x: 3, y: 4 };
+        #[cfg(debug_assertions)]
+        let p2_default_position = Position { x: 7, y: 4 };
+        #[cfg(not(debug_assertions))]
         let p2_default_position = Position { x: 17, y: 4 };
 
         // Add systems
@@ -325,6 +328,9 @@ mod test {
         // Setup
         let mut app = App::new();
         let p1_up_position = Position { x: 3, y: 4 };
+        #[cfg(debug_assertions)]
+        let p2_up_position = Position { x: 7, y: 4 };
+        #[cfg(not(debug_assertions))]
         let p2_up_position = Position { x: 17, y: 4 };
 
         // Add systems
@@ -353,6 +359,9 @@ mod test {
             });
 
         let p1_up_right_position = Position { x: 4, y: 4 };
+        #[cfg(debug_assertions)]
+        let p2_up_right_position = Position { x: 7, y: 5 };
+        #[cfg(not(debug_assertions))]
         let p2_up_right_position = Position { x: 17, y: 5 };
 
         // Move Right
@@ -380,6 +389,9 @@ mod test {
         // Setup
         let mut app = App::new();
         let down_left_position = Position { x: 2, y: 2 };
+        #[cfg(debug_assertions)]
+        let p2_up_position = Position { x: 17, y: 5 };
+        #[cfg(not(debug_assertions))]
         let p2_up_position = Position { x: 17, y: 5 };
 
         // Add systems
@@ -422,6 +434,9 @@ mod test {
         // Setup
         let mut app = App::new();
         let p1_down_left_position = Position { x: 3, y: 4 };
+        #[cfg(debug_assertions)]
+        let p2_down_left_position = Position { x: 7, y: 4 };
+        #[cfg(not(debug_assertions))]
         let p2_down_left_position = Position { x: 17, y: 4 };
 
         // Add systems
