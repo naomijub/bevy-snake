@@ -62,10 +62,17 @@ mod test {
     #[test]
     fn transform_has_correct_scale_for_window() {
         // Setup
+        #[cfg(debug_assertions)]
         let expected_transform = Transform {
             scale: Vec3::new(20., 20., 1.),
             ..default()
         };
+        #[cfg(not(debug_assertions))]
+        let expected_transform = Transform {
+            scale: Vec3::new(10., 10., 1.),
+            ..default()
+        };
+
         let mut default_transform = Transform {
             scale: Vec3::new(2., 3., 4.),
             ..default()
@@ -88,14 +95,20 @@ mod test {
     fn convert_position_x_for_grid_width() {
         let x = convert(4., 400., GRID_WIDTH as f32);
 
-        assert_relative_eq!(x, -20., epsilon = 0.00001)
+        #[cfg(debug_assertions)]
+        assert_relative_eq!(x, -20., epsilon = 0.00001);
+        #[cfg(not(debug_assertions))]
+        assert_relative_eq!(x, -110., epsilon = 0.00001);
     }
 
     #[test]
     fn convert_position_y_for_grid_height() {
         let x = convert(5., 400., GRID_HEIGHT as f32);
 
-        assert_relative_eq!(x, 20., epsilon = 0.00001)
+        #[cfg(debug_assertions)]
+        assert_relative_eq!(x, 20., epsilon = 0.00001);
+        #[cfg(not(debug_assertions))]
+        assert_relative_eq!(x, -90., epsilon = 0.00001)
     }
 
     #[test]
@@ -103,7 +116,10 @@ mod test {
         let position = Position { x: 2, y: 8 };
         let mut default_transform = Transform::default();
         let expected = Transform {
+            #[cfg(debug_assertions)]
             translation: Vec3::new(-100., 140., 0.),
+            #[cfg(not(debug_assertions))]
+            translation: Vec3::new(-150., -29.999996, 0.),
             ..default()
         };
 
