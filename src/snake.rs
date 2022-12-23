@@ -390,7 +390,7 @@ mod test {
         let mut app = App::new();
         let down_left_position = Position { x: 2, y: 2 };
         #[cfg(debug_assertions)]
-        let p2_up_position = Position { x: 17, y: 5 };
+        let p2_up_position = Position { x: 7, y: 5 };
         #[cfg(not(debug_assertions))]
         let p2_up_position = Position { x: 17, y: 5 };
 
