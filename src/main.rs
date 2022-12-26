@@ -13,8 +13,8 @@ fn main() {
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             window: WindowDescriptor {
                 title: "Snake Game".to_string(),
-                width: 500.0,
-                height: 500.0,
+                width: 1000.0,
+                height: 1000.0,
                 ..default()
             },
             ..default()
