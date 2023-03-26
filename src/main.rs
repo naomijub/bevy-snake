@@ -1,4 +1,6 @@
-use bevy::{prelude::*, time::FixedTimestep};
+use std::time::Duration;
+
+use bevy::{prelude::*, time::common_conditions::on_timer, window::ExitCondition};
 use components::GameEndEvent;
 use snake::GrowthEvent;
 
@@ -11,13 +13,13 @@ pub mod snake;
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
-            window: WindowDescriptor {
+            primary_window: Some(Window {
+                resolution: (1000., 1000.).into(),
                 title: "Snake Game".to_string(),
-                width: 1000.0,
-                height: 1000.0,
                 ..default()
-            },
-            ..default()
+            }),
+            exit_condition: ExitCondition::OnAllClosed,
+            close_when_requested: true,
         }))
         .insert_resource(snake::Segments::default())
         .insert_resource(snake::LastTailPosition::default())
@@ -25,25 +27,22 @@ fn main() {
         .add_event::<GameEndEvent>()
         .add_startup_system(setup_camera)
         .add_startup_system(snake::spawn_system)
-        .add_system_set(
-            SystemSet::new()
-                .with_run_criteria(FixedTimestep::step(1.0))
-                .with_system(food::spawn_system),
+        .add_system(food::spawn_system.run_if(on_timer(Duration::from_secs_f32(1.0))))
+        .add_system(snake::movement_system.run_if(on_timer(Duration::from_secs_f32(0.15))))
+        .add_system(
+            snake::eating_system
+                .after(snake::movement_system)
+                .run_if(on_timer(Duration::from_secs_f32(0.15))),
         )
-        .add_system_set(
-            SystemSet::new()
-                .with_run_criteria(FixedTimestep::step(0.150))
-                .with_system(snake::movement_system)
-                .with_system(snake::eating_system.after(snake::movement_system))
-                .with_system(snake::growth_system.after(snake::eating_system)),
+        .add_system(
+            snake::growth_system
+                .after(snake::eating_system)
+                .run_if(on_timer(Duration::from_secs_f32(0.15))),
         )
         .add_system(snake::movement_input_system.before(snake::movement_system))
         .add_system(game::game_over_system.after(snake::movement_system))
-        .add_system_set_to_stage(
-            CoreStage::PostUpdate,
-            SystemSet::new()
-                .with_system(grid::position_translation)
-                .with_system(grid::size_scaling),
+        .add_systems(
+            (grid::position_translation, grid::size_scaling).in_base_set(CoreSet::PostUpdate),
         )
         .run();
 }

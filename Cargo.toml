@@ -6,10 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = { version = "0.9", features = ["dynamic"] }
-rand = "0.7"
+bevy = { version = "0.10", features = ["dynamic_linking"] }
+rand = "0.8.5"
 
 [dev-dependencies]
-raw-window-handle = "0.4.3"
-proptest = "1.0.0"
+proptest = "1.1.0"
 approx = "0.5.1"
