@@ -1,5 +1,5 @@
 use crate::components::{Position, Size};
-use bevy::prelude::*;
+use bevy::{prelude::*, window::PrimaryWindow};
 
 #[cfg(debug_assertions)]
 pub(crate) const GRID_WIDTH: u16 = 10;
@@ -12,8 +12,11 @@ pub(crate) const GRID_HEIGHT: u16 = 20;
 
 #[allow(clippy::missing_panics_doc)]
 #[allow(clippy::needless_pass_by_value)]
-pub fn size_scaling(windows: Res<Windows>, mut q: Query<(&Size, &mut Transform)>) {
-    let window = windows.get_primary().unwrap();
+pub fn size_scaling(
+    primary_window: Query<&Window, With<PrimaryWindow>>,
+    mut q: Query<(&Size, &mut Transform)>,
+) {
+    let window = primary_window.get_single().unwrap();
     for (sprite_size, mut transform) in q.iter_mut() {
         scale_sprite(transform.as_mut(), sprite_size, window);
     }
@@ -21,8 +24,11 @@ pub fn size_scaling(windows: Res<Windows>, mut q: Query<(&Size, &mut Transform)>
 
 #[allow(clippy::missing_panics_doc)]
 #[allow(clippy::needless_pass_by_value)]
-pub fn position_translation(windows: Res<Windows>, mut q: Query<(&Position, &mut Transform)>) {
-    let window = windows.get_primary().unwrap();
+pub fn position_translation(
+    primary_window: Query<&Window, With<PrimaryWindow>>,
+    mut q: Query<(&Position, &mut Transform)>,
+) {
+    let window = primary_window.get_single().unwrap();
     for (pos, mut transform) in q.iter_mut() {
         translate_position(transform.as_mut(), pos, window);
     }
@@ -57,7 +63,7 @@ mod test {
     use super::*;
     use crate::components::Size;
     use approx::assert_relative_eq;
-    use bevy::window::WindowId;
+    use bevy::window::WindowResolution;
 
     #[test]
     fn transform_has_correct_scale_for_window() {
@@ -80,10 +86,10 @@ mod test {
         let sprite_size = Size::square(1.);
 
         // Create window
-        let mut descriptor = WindowDescriptor::default();
-        descriptor.height = 200.;
-        descriptor.width = 200.;
-        let window = Window::new(WindowId::new(), &descriptor, 200, 200, 1., None, None);
+        let window = Window {
+            resolution: WindowResolution::new(200., 200.),
+            ..default()
+        };
 
         // Apply scale
         scale_sprite(&mut default_transform, &sprite_size, &window);
@@ -124,10 +130,15 @@ mod test {
         };
 
         // Create window
-        let mut descriptor = WindowDescriptor::default();
-        descriptor.height = 400.;
-        descriptor.width = 400.;
-        let window = Window::new(WindowId::new(), &descriptor, 400, 400, 1., None, None);
+        // let mut descriptor = Window::default();
+        // descriptor.
+        // descriptor.height = 400.;
+        // descriptor.width = 400.;
+        // let window = Window::new(WindowId::new(), &descriptor, 400, 400, 1., None, None);
+        let window = Window {
+            resolution: WindowResolution::new(400., 400.),
+            ..default()
+        };
 
         // Apply translation
         translate_position(&mut default_transform, &position, &window);

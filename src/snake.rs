@@ -571,12 +571,11 @@ mod test {
             .add_event::<GameEndEvent>()
             .add_startup_system(spawn_system)
             .add_system(crate::food::spawn_system)
-            .add_system_set(
-                SystemSet::new()
-                    .with_system(movement_system)
-                    .with_system(eating_system.after(movement_system))
-                    .with_system(growth_system.after(eating_system)),
-            );
+            .add_systems((
+                movement_system,
+                eating_system.after(movement_system),
+                growth_system.after(eating_system),
+            ));
 
         // Run systems
         app.update();
